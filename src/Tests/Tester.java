@@ -22,10 +22,10 @@ public class Tester {
             h2 = (rand.nextInt(100) < 50) ? 'W' : 'E';
             v2 = (rand.nextInt(100) < 50) ? 'N' : 'S';
 
-            x1 = rand.nextInt((int) quadTree.getWidth() / 2);
-            y1 = rand.nextInt((int) quadTree.getHeight() / 2);
-            x2 = rand.nextInt((int) quadTree.getWidth() / 2);
-            y2 = rand.nextInt((int) quadTree.getHeight() / 2);
+            x1 = rand.nextInt((int) quadTree.getWidth() );
+            y1 = rand.nextInt((int) quadTree.getHeight() );
+            x2 = rand.nextInt((int) quadTree.getWidth() );
+            y2 = rand.nextInt((int) quadTree.getHeight() );
 
             first = new GPS(x1, y1, h1, v1);
             second = new GPS(x2, y2, h2, v2);
@@ -220,11 +220,16 @@ public class Tester {
             shapes.add(shape);
         }
 
+        int nX1,nY1,nX2,nY2;
+        nX1 = rand.nextInt((int) tree.getWidth());
+        nX2 = rand.nextInt((int) tree.getHeight());
+        nY1 = rand.nextInt((int) tree.getWidth());
+        nY2 = rand.nextInt((int) tree.getHeight());
 
-        x1 = rand.nextInt((int) tree.getWidth());
-        y1 = rand.nextInt((int) tree.getHeight());
-        x2 = rand.nextInt((int) tree.getWidth());
-        y2 = rand.nextInt((int) tree.getHeight());
+        x1 = Math.min(nX1,nX2);
+        x2 = Math.max(nX1,nX2);
+        y1= Math.min(nY1,nY2);
+        y2= Math.max(nY1,nY2);
 
 
         double correctFound = 0;

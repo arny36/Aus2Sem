@@ -63,7 +63,7 @@ public class QuadTree <T extends IData<T>> {
 
                     } else {
                         if (tempNode.getData().size() > 0 && !tempNode.hasChildren() ) {
-                            if (decisionMaker != 0) {
+                            if (decisionMaker == 1) {
                                 tempNode.setNw(new Node<T>(tempNode.getX1(), (tempNode.getY1() + tempNode.getY2() )/ 2, (tempNode.getX1() + tempNode.getX2()) / 2, tempNode.getY2(), tempNode.getDepth() + 1));
                                 tempNode.setNe(new Node<T>(((tempNode.getX1() + tempNode.getX2())) / 2, (tempNode.getY1() + tempNode.getY2()) / 2, tempNode.getX2(), tempNode.getY2(), tempNode.getDepth() + 1));
                                 tempNode.setSe(new Node<T>((tempNode.getX1() + tempNode.getX2()) / 2, tempNode.getY1(), tempNode.getX2(), (tempNode.getY1() + tempNode.getY2()) / 2, tempNode.getDepth() + 1));
@@ -93,10 +93,8 @@ public class QuadTree <T extends IData<T>> {
 
                             }
                         }
-                        if (decisionMaker == 0) {
-                            tempNode.addData(dataQueue);
-                            dataQueue = null;
-                        } else if (decisionMaker == 1) {
+
+                        if (dataQueue.compareTo(tempNode.getNw()) == 1) {
                             if (tempNode.getNw().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
                                 tempNode = tempNode.getNw();
                                 tempNode.addData(dataQueue);
@@ -105,25 +103,25 @@ public class QuadTree <T extends IData<T>> {
                             } else {
                                 tempNode = tempNode.getNw();
                             }
-                        } else if (decisionMaker == 2) {
+                        } else if (dataQueue.compareTo(tempNode.getNe()) == 1) {
                             if (tempNode.getNe().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
-                                tempNode = tempNode.getNe();
-                                tempNode.addData(dataQueue);
-                                tempNode = tempNode.getParent();
-                                dataQueue = null;
+                            tempNode = tempNode.getNe();
+                            tempNode.addData(dataQueue);
+                            tempNode = tempNode.getParent();
+                            dataQueue = null;
                             } else {
                                 tempNode = tempNode.getNe();
                             }
-                        } else if (decisionMaker == 3) {
+                        } else if (dataQueue.compareTo(tempNode.getSe()) == 1) {
                             if (tempNode.getSe().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
-                                tempNode = tempNode.getSe();
-                                tempNode.addData(dataQueue);
-                                tempNode = tempNode.getParent();
-                                dataQueue = null;
+                            tempNode = tempNode.getSe();
+                            tempNode.addData(dataQueue);
+                            tempNode = tempNode.getParent();
+                            dataQueue = null;
                             } else {
                                 tempNode = tempNode.getSe();
                             }
-                        } else if (decisionMaker == 4) {
+                        } else if (dataQueue.compareTo(tempNode.getSw()) == 1) {
                             if (tempNode.getSw().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
                                 tempNode = tempNode.getSw();
                                 tempNode.addData(dataQueue);
@@ -132,7 +130,14 @@ public class QuadTree <T extends IData<T>> {
                             } else {
                                 tempNode = tempNode.getSw();
                             }
+                        } else {
+                            tempNode.addData(dataQueue);
+                            dataQueue = null;
                         }
+
+
+
+
                     }
                 } else {
                     if (tempNode.getParent().hasParent()) {
@@ -148,20 +153,17 @@ public class QuadTree <T extends IData<T>> {
         }
     }
     private int checkIfNodeIn(Node<T> node, double x1, double y1, double x2, double y2) {
-        if (x1 >= node.getX1() && y1 >= ((node.getY1() + node.getY2()) / 2) &&
-                x2 <= ((node.getX1() + node.getX2()) / 2) && y2 <= node.getY2()) {
+        if (x1 >= node.getX1() && y1 >= node.getY1()
+                && x2 <= node.getX2() && y2 <= node.getY2()) {
             return 1;
-        } else if (x1 >= ((node.getX1() + node.getX2()) / 2) && y1 >= ((node.getY1() + node.getY2()) / 2) &&
-                x2 <= node.getX2() && y2 <= node.getY2()) {
-            return 2;
-        } else if (x1 >= ((node.getX1() + node.getX2()) / 2) && y1 >= node.getY1() &&
-                x2 <= node.getX2() && y2 <= ((node.getY1() + node.getY2()) / 2)) {
-            return 3;
-        } else if (x1 >= node.getX1() && y1 >= node.getY1() &&
-                x2 <= ((node.getX1() + node.getX2()) / 2) && y2 <= (node.getY1() + node.getY2()) / 2) {
-            return 4;
-        } else if (x1 >= node.getX1() && y1 >= node.getY1() &&
-                x2 <= node.getX2() && y2 <= node.getY2()) {
+        } else if ((node.getX1() <= x1 && x1 <= node.getX2()) ||
+                (node.getX1() <= x2 && x2 <= node.getX2()) ||
+                (x1 <= node.getX1() && node.getX1() <= x2) ||
+                (x1 <= node.getX2() && node.getX2() <= x2)
+                        && (node.getY1() <= y1 && y1 <= node.getY2()) ||
+                (node.getY1() <= y2 && y2 <= node.getY2()) ||
+                (y1 <= node.getY1() && node.getY1() <= y2) ||
+                (y1 <= node.getY2() && node.getY2() <= y2)) {
             return 0;
         } else {
             return -1;
@@ -181,39 +183,22 @@ public class QuadTree <T extends IData<T>> {
         Node<T> node = this.getRoot();
         Stack queue = new Stack<T>();
         queue.push(node);
-        int comparator;
         Node<T> data;
         while(queue.size()>0){
             data = (Node<T>) queue.pop();
-            comparator = checkIfNodeIn(data,nX1,nY1,nX2,nY2);
+
             if (data.hasChildren()){
-                switch (comparator) {
-                    case 0:
-                        queue.push(data.getNw());
-                        queue.push(data.getNe());
-                        queue.push(data.getSe());
-                        queue.push(data.getSw());
-                        break;
-                    case 1:
-                        queue.push(data.getNw());
-                        break;
-                    case 2:
-                        queue.push(data.getNe());
-                        break;
-                    case 3:
-                        queue.push(data.getSe());
-                        break;
-                    case 4:
-                        queue.push(data.getSw());
-                        break;
-                    case -1:
-                        queue.push(data.getNw());
-                        queue.push(data.getNe());
-                        queue.push(data.getSe());
-                        queue.push(data.getSw());
-                        break;
-                    default:
-                        break;
+                if (checkIfNodeIn(data.getNw(),x1,y1,x2,y2) != -1) {
+                    queue.push(data.getNw());
+                }
+                if (checkIfNodeIn(data.getNe(),x1,y1,x2,y2) != -1) {
+                    queue.push(data.getNe());
+                }
+                if (checkIfNodeIn(data.getSe(),x1,y1,x2,y2) != -1) {
+                    queue.push(data.getSe());
+                }
+                if (checkIfNodeIn(data.getSw(),x1,y1,x2,y2) != -1) {
+                    queue.push(data.getSw());
                 }
 
             }
@@ -229,43 +214,39 @@ public class QuadTree <T extends IData<T>> {
         return finalList;
     }
 
-    public void delete(T data) {
+    private Node<T> findNode(T data){
         Node<T> node = this.getRoot();
-        Stack queue = new Stack<T>();
-        int comparator;
         boolean finder =  true;
         while (finder) {
-            comparator = data.compareTo(node);
             for (T item : node.getData()) {
                 if (data == item) {
                     finder=false;
-                    break;
                 }
             }
             if (finder) {
-                switch (comparator) {
-                    case 0:
-                        System.out.println("neexistuje");
-                        break;
-                    case 1:
-                        node = node.getNw();
-                        break;
-                    case 2:
-                        node = node.getNe();
-                        break;
-                    case 3:
-                        node = node.getSe();
-                        break;
-                    case 4:
-                        node = node.getSw();
-                        break;
-                    default:
-                        System.out.println("prvok sa nenašiel");
-                        finder=false;
-                        break;
+                if (data.compareTo(node.getNw()) == 1) {
+                    node=node.getNw();
                 }
+                else if (data.compareTo(node.getNe()) == 1) {
+                    node=node.getNe();
+                }
+                else if (data.compareTo(node.getSw()) == 1) {
+                    node=node.getSw();
+                }
+                else if (data.compareTo(node.getSe()) == 1) {
+                    node=node.getSe();
+                }
+
             }
         }
+
+        return node;
+    }
+    public void delete(T data) {
+        Node<T> node;
+        Stack queue = new Stack<T>();
+        findNode(data);
+        node = this.findNode(data);
         node.getData().remove(data);
         queue.push(node);
         if (node.getData().size()<=1) {

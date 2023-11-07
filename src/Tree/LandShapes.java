@@ -41,25 +41,44 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
 
     @Override
     public int compareTo(Node<T> node) {
-        if (this.first.getX() >= node.getX1() && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
-                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY2())) {
+        if (this.first.getX() >= node.getX1() && this.first.getY() >= node.getY1()
+                && this.second.getX() <= node.getX2() && this.second.getY() <= node.getY2()) {
             return 1;
-        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
-                this.second.getX() <= (node.getX2()) && this.second.getY() <= (node.getY2())) {
-            return 2;
-        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= (node.getY1()) &&
-                this.second.getX() <= (node.getX2()) && this.second.getY() <= ((node.getY1() + node.getY2()) / 2)) {
-            return 3;
-        } else if (this.first.getX() >= (node.getX1()) && this.first.getY() >= (node.getY1()) &&
-                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY1() + node.getY2() )/ 2) {
-            return 4;
-        } else if (this.first.getX() >= node.getX1() && this.first.getY() >= node.getY1() &&
-                this.second.getX() <= node.getX2() && this.second.getY() <= node.getY2()) {
+        } else if ((node.getX1() <= this.first.getX() && this.first.getX() <= node.getX2()) ||
+                (node.getX1() <= this.second.getX() && this.second.getX() <= node.getX2()) ||
+                (this.first.getX() <= node.getX1() && node.getX1() <= this.second.getX()) ||
+                (this.first.getX() <= node.getX2() && node.getX2() <= this.second.getX())
+                        && (node.getY1() <= this.first.getY() && this.first.getY() <= node.getY2()) ||
+                (node.getY1() <= this.second.getY() && this.second.getY() <= node.getY2()) ||
+                (this.first.getY() <= node.getY1() && node.getY1() <= this.second.getY()) ||
+                (this.first.getY() <= node.getY2() && node.getY2() <= this.second.getY())) {
             return 0;
         } else {
             return -1;
         }
     }
+
+//    @Override
+//    public int compareTo(Node<T> node) {
+//        if (this.first.getX() >= node.getX1() && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
+//                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY2())) {
+//            return 1;
+//        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
+//                this.second.getX() <= (node.getX2()) && this.second.getY() <= (node.getY2())) {
+//            return 2;
+//        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= (node.getY1()) &&
+//                this.second.getX() <= (node.getX2()) && this.second.getY() <= ((node.getY1() + node.getY2()) / 2)) {
+//            return 3;
+//        } else if (this.first.getX() >= (node.getX1()) && this.first.getY() >= (node.getY1()) &&
+//                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY1() + node.getY2() )/ 2) {
+//            return 4;
+//        } else if (this.first.getX() >= node.getX1() && this.first.getY() >= node.getY1() &&
+//                this.second.getX() <= node.getX2() && this.second.getY() <= node.getY2()) {
+//            return 0;
+//        } else {
+//            return -1;
+//        }
+//    }
 
 
     @Override
