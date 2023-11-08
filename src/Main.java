@@ -2,7 +2,6 @@ import GUI.Gui;
 import Tests.Tester;
 import Tree.QuadTree;
 
-
 import javax.swing.*;
 
 public class Main {
@@ -14,22 +13,32 @@ public class Main {
                 gui.pack();
             }
         });
-
-
-
-//        QuadTree tree = new QuadTree(100,100,6);
-//        Tester tester =  new Tester();
-//        if(tester.testInsert(tree, 1000)) {
-//            System.out.println("ide");
-//        }
+//        int counter = 0;
+//        int health = 0;
+//        for (int i = 0; i <1000 ; i++) {
 //
-//        if (tester.testSearch(tree,5000)) {
-//            System.out.printf("ide");
-//        }
 //
-//        if (tester.testInsertDelete(tree,70000,70,30)) {
-//            System.out.println("ide");
+//            QuadTree tree = new QuadTree<>(100,100,5);
+//            QuadTree newTree;
+//            Tester tester = new Tester();
+//
+//            tester.testShapeAll(tree,9,100,0);
+//            newTree = tree.optimize();
+//
+//            if (tree.treeHealth() <= newTree.treeHealth()) {
+//                for (Object item: newTree.getRoot().getData()) {
+//                    counter++;
+//                }
+//                health++;
+//                System.out.println(counter+"----  >    "+tree.treeHealth() + " < " + newTree.treeHealth());
+//                counter=0;
+//            }
 //        }
+//        System.out.println(health);
+//
+//
+//
+//
     }
 }
 

@@ -32,7 +32,7 @@ public class Tester {
 
             shape = new Shape(i, first, second, "blabla");
 
-            quadTree.insert(shape);
+            quadTree.optimalizedInsert(shape);
             arrayList.add(shape);
         }
         helpForSearch = quadTree.search(0,0,quadTree.getWidth(),quadTree.getHeight());
@@ -117,10 +117,10 @@ public class Tester {
                 h2 = (rand.nextInt(100) < 50) ? 'W' : 'E';
                 v2 = (rand.nextInt(100) < 50) ? 'N' : 'S';
 
-                x1 = rand.nextInt((int) tree.getWidth());
-                y1 = rand.nextInt((int) tree.getHeight());
-                x2 = rand.nextInt((int) tree.getWidth());
-                y2 = rand.nextInt((int) tree.getHeight());
+                x1 = rand.nextInt((int) tree.getWidth()/2);
+                y1 = rand.nextInt((int) tree.getHeight()/2);
+                x2 = rand.nextInt((int) tree.getWidth()/2);
+                y2 = rand.nextInt((int) tree.getHeight()/2);
 
                 first = new GPS(x1, y1, h1, v1);
                 second = new GPS(x2, y2, h2, v2);
@@ -253,6 +253,9 @@ public class Tester {
         }
         return false;
     }
+
+
+
 
 
 }

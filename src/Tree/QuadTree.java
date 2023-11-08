@@ -3,7 +3,10 @@ package Tree;
 
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Stack;
+
+
 
 public class QuadTree <T extends IData<T>> {
     private Node<T> root;
@@ -12,7 +15,7 @@ public class QuadTree <T extends IData<T>> {
 
     private double maxDepth;
 
-    public QuadTree(int width, int height, int maxDepth) {
+    public QuadTree(double width, double height, double maxDepth) {
         this.root = new Node<T>(0,0,width,height,1);
         this.width = width;
         this.height = height;
@@ -63,7 +66,7 @@ public class QuadTree <T extends IData<T>> {
 
                     } else {
                         if (tempNode.getData().size() > 0 && !tempNode.hasChildren() ) {
-                            if (decisionMaker == 1) {
+                            if (dataQueue.canCreateSons(tempNode)) {
                                 tempNode.setNw(new Node<T>(tempNode.getX1(), (tempNode.getY1() + tempNode.getY2() )/ 2, (tempNode.getX1() + tempNode.getX2()) / 2, tempNode.getY2(), tempNode.getDepth() + 1));
                                 tempNode.setNe(new Node<T>(((tempNode.getX1() + tempNode.getX2())) / 2, (tempNode.getY1() + tempNode.getY2()) / 2, tempNode.getX2(), tempNode.getY2(), tempNode.getDepth() + 1));
                                 tempNode.setSe(new Node<T>((tempNode.getX1() + tempNode.getX2()) / 2, tempNode.getY1(), tempNode.getX2(), (tempNode.getY1() + tempNode.getY2()) / 2, tempNode.getDepth() + 1));
@@ -76,7 +79,7 @@ public class QuadTree <T extends IData<T>> {
 
                             if (tempNode.getData().size() > 0) {
                                 for (T item : tempNode.getData()) {
-                                    if (item.compareTo(tempNode) != 0) {
+                                    if (item.canCreateSons(tempNode)) {
                                         queue.push(item);
                                     }
                                     else {
@@ -94,7 +97,11 @@ public class QuadTree <T extends IData<T>> {
                             }
                         }
 
-                        if (dataQueue.compareTo(tempNode.getNw()) == 1) {
+                        if (!dataQueue.canCreateSons(tempNode)){
+                            tempNode.addData(dataQueue);
+                            dataQueue = null;
+                        }
+                        else if (dataQueue.compareTo(tempNode.getNw()) == 1) {
                             if (tempNode.getNw().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
                                 tempNode = tempNode.getNw();
                                 tempNode.addData(dataQueue);
@@ -449,6 +456,245 @@ public class QuadTree <T extends IData<T>> {
         }
         this.root= root;
         this.maxDepth=newDepth;
+    }
+
+    private ArrayList<T> findAllLands(){
+        ArrayList<T> finalArray = new ArrayList<>();
+        Node<T> node = this.getRoot();
+        LinkedList<Node<T>> list = new LinkedList<>();
+        list.push(node);
+        while(list.size()>0){
+            node =list.pop();
+            if (node.hasData()) {
+                for (T item:node.getData()) {
+                    finalArray.add(item);
+                }
+            }
+            if (node.hasChildren()) {
+                list.push(node.getNw());
+                list.push(node.getNe());
+                list.push(node.getSe());
+                list.push(node.getSw());
+            }
+        }
+        return finalArray;
+    }
+
+    private int countLands() {
+        int counter = 0;
+        Node<T> node = this.getRoot();
+        LinkedList<Node<T>> list = new LinkedList<>();
+
+        list.push(node);
+        while(list.size()>0){
+            node =list.pop();
+            if (node.hasData()) {
+                for (T item:node.getData()) {
+                    counter++;
+                }
+            }
+            if (node.hasChildren()) {
+                list.push(node.getNw());
+                list.push(node.getNe());
+                list.push(node.getSe());
+                list.push(node.getSw());
+            }
+        }
+        return counter;
+    }
+
+    private int countFreeNodes() {
+        int counter = 0;
+        Node<T> node = this.getRoot();
+        LinkedList<Node<T>> list = new LinkedList<>();
+        list.push(node);
+        while(list.size()>0){
+            node =list.pop();
+            if (!node.hasData()) {
+              counter++;
+            }
+            if (node.hasChildren()) {
+                list.push(node.getNw());
+                list.push(node.getNe());
+                list.push(node.getSe());
+                list.push(node.getSw());
+            }
+        }
+        return counter;
+    }
+    private int countLandsInMaxDepth() {
+        int counter = 0;
+        Node<T> node = this.getRoot();
+        LinkedList<Node<T>> list = new LinkedList<>();
+        list.push(node);
+        while(list.size()>0){
+            node =list.pop();
+            if (node.hasData() && node.getDepth() == this.maxDepth) {
+                for (T item:node.getData()) {
+                        counter++;
+                }
+            }
+            if (node.hasChildren()) {
+                list.push(node.getNw());
+                list.push(node.getNe());
+                list.push(node.getSe());
+                list.push(node.getSw());
+            }
+        }
+        return counter;
+    }
+
+
+    public QuadTree<T> optimize(){
+
+
+
+        QuadTree<T> newTree = new QuadTree<>(this.width,this.height,this.maxDepth);
+        ArrayList<T> finalArray = findAllLands();
+        for (T item:finalArray) {
+            newTree.optimalizedInsert(item);
+
+        }
+        double newDepth;
+        double freeNodes = newTree.countFreeNodes();
+        double countLands = newTree.countLands();
+        double countLandsMaxDepth = newTree.countLandsInMaxDepth();
+        if (freeNodes > countLands) {
+            newDepth = Math.ceil(Math.cbrt(freeNodes)) ;
+            newTree.changeDepthTree(newDepth);
+        } else if (countLandsMaxDepth > freeNodes) {
+            newTree.changeDepthTree(Math.ceil(Math.cbrt(countLands)));
+        }
+
+
+
+        return newTree;
+
+    }
+
+    public void optimalizedInsert(T data) {
+        Node<T> tempNode;
+        tempNode = this.root;
+        int decisionMaker;
+        Stack queue = new Stack<T>();
+        Stack newData = new Stack<T>();
+        T dataQueue = null;
+        queue.push(data);
+        boolean stopper = true;
+        double midX;
+        double midY;
+
+        while(stopper){
+            if(dataQueue==null) {
+                dataQueue =(T) queue.pop();
+            }
+            decisionMaker = dataQueue.compareTo(tempNode);
+            if(decisionMaker != -1) {
+                if (tempNode.getDepth() <= this.maxDepth) {
+                    if (!tempNode.hasChildren() && tempNode.getData().size() == 0) {
+                        tempNode.addData(dataQueue);
+                        dataQueue=null;
+                    }
+                    else if (tempNode.getDepth()+1 > this.maxDepth){
+                        tempNode.addData(dataQueue);
+                        dataQueue=null;
+
+                    } else {
+                        if (tempNode.getData().size() > 0 && !tempNode.hasChildren() ) {
+                            if (dataQueue.canCreateSonsOptimize(tempNode)) {
+                                midX=data.calculateX(tempNode);
+                                midY=data.calculateY(tempNode);
+                                tempNode.setNw(new Node<T>(tempNode.getX1(), midY, midX, tempNode.getY2(), tempNode.getDepth() + 1));
+                                tempNode.setNe(new Node<T>(midX , midY, tempNode.getX2(), tempNode.getY2(), tempNode.getDepth() + 1));
+                                tempNode.setSe(new Node<T>(midX, tempNode.getY1(), tempNode.getX2(), midY, tempNode.getDepth() + 1));
+                                tempNode.setSw(new Node<T>(tempNode.getX1(), tempNode.getY1(), midX, midY, tempNode.getDepth() + 1));
+                                tempNode.getNw().setParent(tempNode);
+                                tempNode.getNe().setParent(tempNode);
+                                tempNode.getSe().setParent(tempNode);
+                                tempNode.getSw().setParent(tempNode);
+                            }
+
+                            if (tempNode.getData().size() > 0) {
+                                for (T item : tempNode.getData()) {
+                                    if (item.canCreateSonsOptimize(tempNode)) {
+                                        queue.push(item);
+                                    }
+                                    else {
+                                        newData.push(item);
+                                    }
+                                }
+                                tempNode.getData().clear();
+                                while(newData.size()>0){
+
+                                    tempNode.getData().add( (T)newData.pop());
+                                }
+
+                                newData.clear();
+
+                            }
+                        }
+                        if (!dataQueue.canCreateSonsOptimize(tempNode)){
+                            tempNode.addData(dataQueue);
+                            dataQueue = null;
+                        }
+                        else if (dataQueue.compareTo(tempNode.getNw()) == 1) {
+                            if (tempNode.getNw().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
+                                tempNode = tempNode.getNw();
+                                tempNode.addData(dataQueue);
+                                tempNode = tempNode.getParent();
+                                dataQueue = null;
+                            } else {
+                                tempNode = tempNode.getNw();
+                            }
+                        } else if (dataQueue.compareTo(tempNode.getNe()) == 1) {
+                            if (tempNode.getNe().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
+                                tempNode = tempNode.getNe();
+                                tempNode.addData(dataQueue);
+                                tempNode = tempNode.getParent();
+                                dataQueue = null;
+                            } else {
+                                tempNode = tempNode.getNe();
+                            }
+                        } else if (dataQueue.compareTo(tempNode.getSe()) == 1) {
+                            if (tempNode.getSe().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
+                                tempNode = tempNode.getSe();
+                                tempNode.addData(dataQueue);
+                                tempNode = tempNode.getParent();
+                                dataQueue = null;
+                            } else {
+                                tempNode = tempNode.getSe();
+                            }
+                        } else if (dataQueue.compareTo(tempNode.getSw()) == 1) {
+                            if (tempNode.getSw().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
+                                tempNode = tempNode.getSw();
+                                tempNode.addData(dataQueue);
+                                tempNode = tempNode.getParent();
+                                dataQueue = null;
+                            } else {
+                                tempNode = tempNode.getSw();
+                            }
+                        } else {
+                            tempNode.addData(dataQueue);
+                            dataQueue = null;
+                        }
+
+
+
+
+                    }
+                } else {
+                    if (tempNode.getParent().hasParent()) {
+                        tempNode.getParent().addData(dataQueue);
+                        dataQueue=null;
+                    }
+                }
+            }
+
+            if (dataQueue == null && queue.size() < 1) {
+                stopper = false;
+            }
+        }
+
     }
 
 }

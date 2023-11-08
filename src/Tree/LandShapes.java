@@ -58,27 +58,6 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
         }
     }
 
-//    @Override
-//    public int compareTo(Node<T> node) {
-//        if (this.first.getX() >= node.getX1() && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
-//                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY2())) {
-//            return 1;
-//        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
-//                this.second.getX() <= (node.getX2()) && this.second.getY() <= (node.getY2())) {
-//            return 2;
-//        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= (node.getY1()) &&
-//                this.second.getX() <= (node.getX2()) && this.second.getY() <= ((node.getY1() + node.getY2()) / 2)) {
-//            return 3;
-//        } else if (this.first.getX() >= (node.getX1()) && this.first.getY() >= (node.getY1()) &&
-//                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY1() + node.getY2() )/ 2) {
-//            return 4;
-//        } else if (this.first.getX() >= node.getX1() && this.first.getY() >= node.getY1() &&
-//                this.second.getX() <= node.getX2() && this.second.getY() <= node.getY2()) {
-//            return 0;
-//        } else {
-//            return -1;
-//        }
-//    }
 
 
     @Override
@@ -96,4 +75,90 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
         }
         return false;
     }
+
+    @Override
+    public double calculateX(Node<T> node) {
+        double x=0;
+        double tempX=(node.getX1()+ node.getX2());
+        if (Math.abs(tempX/2 - this.first.getY()) > Math.abs(tempX/2 - this.second.getY())){
+            if ((tempX/10 > Math.abs(tempX/2 - this.second.getY()))) {
+                x=this.second.getY();
+            } else {
+                x=(tempX)/2;
+            }
+        } else {
+            if ((tempX/10 > Math.abs(tempX/2 - this.second.getY()))) {
+                x=this.first.getY();
+            } else {
+                x=tempX/2;
+            }
+        }
+        return x;
+    }
+
+    @Override
+    public double calculateY(Node<T> node) {
+        double y=0;
+        double tempY=(node.getY1()+ node.getY2());
+        if (Math.abs(tempY/2 - this.first.getY()) > Math.abs(tempY/2 - this.second.getY())){
+            if ((tempY/10 > Math.abs(tempY/2 - this.second.getY()))) {
+                y=this.second.getY();
+            } else {
+                y=(tempY)/2;
+            }
+        } else {
+            if ((tempY/10 > Math.abs(tempY/2 - this.second.getY()))) {
+                y=this.first.getY();
+            } else {
+                y=tempY/2;
+            }
+        }
+        return y;
+    }
+
+    @Override
+    public boolean canCreateSons(Node<T> node) {
+        if (this.first.getX() >= node.getX1() && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
+                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY2())) {
+            return true;
+        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
+                this.second.getX() <= (node.getX2()) && this.second.getY() <= (node.getY2())) {
+            return true;
+        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= (node.getY1()) &&
+                this.second.getX() <= (node.getX2()) && this.second.getY() <= ((node.getY1() + node.getY2()) / 2)) {
+            return true;
+        } else if (this.first.getX() >= (node.getX1()) && this.first.getY() >= (node.getY1()) &&
+                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY1() + node.getY2() )/ 2) {
+            return true;
+        }
+
+        return false;
+
+
+    }
+    @Override
+    public boolean canCreateSonsOptimize(Node<T> node) {
+        double x = calculateX(node);
+        double y = calculateY(node);
+
+        if (this.first.getX() >= node.getX1() && this.first.getY() >= (y) &&
+                this.second.getX() <= (y) && this.second.getY() <= (node.getY2())) {
+            return true;
+        } else if (this.first.getX() >= (x) && this.first.getY() >= (y) &&
+                this.second.getX() <= (node.getX2()) && this.second.getY() <= (node.getY2())) {
+            return true;
+        } else if (this.first.getX() >= (x) && this.first.getY() >= (node.getY1()) &&
+                this.second.getX() <= (node.getX2()) && this.second.getY() <= (y)) {
+            return true;
+        } else if (this.first.getX() >= (node.getX1()) && this.first.getY() >= (node.getY1()) &&
+                this.second.getX() <= (x) && this.second.getY() <= (y)) {
+            return true;
+        }
+
+        return false;
+
+
+    }
+
+
 }
