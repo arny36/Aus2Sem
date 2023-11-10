@@ -8,8 +8,9 @@ public interface IData <T> {
      boolean compareTo(double x1, double y1, double x2, double y2);
 
      boolean canCreateSons(Node<T> node);
-     boolean canCreateSonsOptimize(Node<T> node);
+     boolean canCreateSonsOptimize(Node<T> node, double midX, double midY);
 
+     boolean equals(LandShapes land);
      double calculateX(Node<T> node);
      double calculateY(Node<T> node);
 

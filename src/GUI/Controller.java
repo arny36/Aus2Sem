@@ -17,7 +17,8 @@ public class Controller{
     private ArrayList<Property> treePropertyList = new ArrayList<Property>();
     private ArrayList<Shape> treeShapeListForSearch = new ArrayList<Shape>();
     private ArrayList<Property> treePropertyListForSearch = new ArrayList<Property>();
-    private QuadTree treeShape, treeProperty;
+
+    private QuadTree treeShape, treeProperty,treeShapeOptimize, treePropertyOptimize;
 
     private Tester tester = new Tester();
 
@@ -29,6 +30,7 @@ public class Controller{
     public void createTreeProperty(int width, int height, int depth, JTextArea outputArea) {
         try {
             treeProperty = new QuadTree(width, height, depth);
+            treePropertyOptimize = new QuadTree(width, height, depth);
             outputArea.setText("Successfully created tree with PROPERTIES with parameters: width = " + width + ", height = " + height + " and depth = " + depth);
         } catch (NumberFormatException ex) {
             outputArea.setText("Error with creating tree: " + ex.getMessage());
@@ -40,6 +42,7 @@ public class Controller{
     public void createTreeShape(int width, int height, int depth, JTextArea outputArea) {
         try {
             treeShape = new QuadTree(width, height, depth);
+            treeShapeOptimize = new QuadTree(width, height, depth);
             outputArea.setText("Successfully created tree with SHAPES with parameters: width = " + width + ", height = " + height + " and depth = " + depth);
         } catch(NumberFormatException ex) {
             outputArea.setText("Error with creating tree: " + ex.getMessage());
@@ -93,11 +96,11 @@ public class Controller{
             outputArea.setText("Please write correctly parameters: X, Y, Horizontal and Vertical.");
         }
     }
-    public void createShape(int gp1, int gp2 ,JTextArea outputArea ) {
+    public void createShape(int identifier, String note, int gp1, int gp2 ,JTextArea outputArea ) {
         try {
             GPS gps1 = gpsList.get(gp1 - 1);
             GPS gps2 = gpsList.get(gp2 - 1);
-            Shape shape = new Shape(treeShapeList.size(), gps1, gps2, "blabla");
+            Shape shape = new Shape(identifier, gps1, gps2, note);
             treeShape.insert(shape);
             treeShapeList.add(shape);
             ArrayList<Property> temp = treeProperty.search(shape.getFirst().getX(), shape.getFirst().getY(), shape.getSecond().getX(), shape.getSecond().getY());
@@ -111,11 +114,11 @@ public class Controller{
         }
     }
 //
-    public void createProperty(int gp1, int gp2 ,JTextArea outputArea ) {
+    public void createProperty(int identifier, String note, int gp1, int gp2 ,JTextArea outputArea ) {
         try {
             GPS gps1 = gpsList.get(gp1 - 1);
             GPS gps2 = gpsList.get(gp2 - 1);
-            Property property = new Property(treePropertyList.size(), gps1, gps2, "blabla");
+            Property property = new Property(identifier, gps1, gps2, note);
             treeProperty.insert(property);
             treePropertyList.add(property);
             ArrayList<Shape> temp = treeShape.search(property.getFirst().getX(), property.getFirst().getY(), property.getSecond().getX(), property.getSecond().getY());
@@ -228,18 +231,40 @@ public class Controller{
         }
     }
 
-    public void calculateHealthShape(JTextArea outputArea ) {
+    public void calculateHealthShape(int index,JTextArea outputArea ) {
+        double health=0;
         try {
-            double health = Math.round(treeShape.treeHealth() * 100);
+            switch (index) {
+                case 1:
+                    health = Math.round(treeShape.treeHealth() * 100);
+                    break;
+                case 2:
+                    health = Math.round(treeShapeOptimize.treeHealth() * 100);
+                    break;
+                default:
+                    break;
+
+            }
             outputArea.setText("Tree Shape health is " + health + "%");
         } catch (Exception ex) {
             outputArea.setText("Error calculating shape health: " + ex.getMessage());
         }
     }
 
-    public void calculateHealthProperty(JTextArea outputArea ) {
+    public void calculateHealthProperty(int index,JTextArea outputArea ) {
+        double health=0;
         try {
-            double health = Math.round(treeProperty.treeHealth() * 100);
+            switch (index) {
+                case 1:
+                    health = Math.round(treeProperty.treeHealth() * 100);
+                    break;
+                case 2:
+                    health = Math.round(treePropertyOptimize.treeHealth() * 100);
+                    break;
+                default:
+                    break;
+
+            }
             outputArea.setText("Tree Property health is " + health + "%");
         } catch (Exception ex) {
             outputArea.setText("Error calculating property health: " + ex.getMessage());
@@ -264,6 +289,26 @@ public class Controller{
         }
     }
 
+
+    public void optimize(int indexTree,JTextArea outputArea ) {
+        try {
+            switch (indexTree) {
+                case 1:
+                    treeShapeOptimize = treeShape.optimize();
+                    outputArea.setText("Tree SHAPE is optimized");
+                    break;
+                case 2:
+                    treePropertyOptimize = treeProperty.optimize();
+                    outputArea.setText("Tree PROPERTY is optimized");
+                    break;
+                default:
+                    outputArea.setText("Error optimizing uncorrect number in index");
+                    break;
+            }
+        }catch (Exception ex) {
+            outputArea.setText("Error optimizing: " + ex.getMessage());
+        }
+    }
     public void resetAll(JTextArea outputArea ) {
         try {
 
@@ -289,63 +334,139 @@ public class Controller{
         }
     }
 
-    public void testAllShapes(int counter, int insert, int delete ,JTextArea outputArea  ) {
+    public void testAllShapes(int index,int counter, int insert, int delete ,JTextArea outputArea  ) {
         try {
-            ArrayList<Shape> temp = tester.testShapeAll(
-                    treeShape,
-                    counter,
-                    insert,
-                    delete
-            );
 
-            for (Shape shape : temp) {
-                ArrayList<Property> propertiesNew = treeProperty.search(
-                        shape.getFirst().getX(),
-                        shape.getFirst().getY(),
-                        shape.getSecond().getX(),
-                        shape.getSecond().getY()
+            boolean optimize;
+            if (index == 2) {
+                optimize=true;
+            } else {
+                optimize=false;
+            }
+            if (index == 1) {
+                ArrayList<Shape> temp = tester.testShapeAll(
+                        treeShape,
+                        counter,
+                        insert,
+                        delete,
+                        optimize,1
                 );
 
-                for (Property property : propertiesNew) {
-                    property.getShapes().add(shape);
-                    shape.getProperties().add(property);
-                }
+                for (Shape shape : temp) {
+                    ArrayList<Property> propertiesNew = treeProperty.search(
+                            shape.getFirst().getX(),
+                            shape.getFirst().getY(),
+                            shape.getSecond().getX(),
+                            shape.getSecond().getY()
+                    );
 
-                treeShapeList.add(shape);
+                    for (Property property : propertiesNew) {
+                        property.getShapes().add(shape);
+                        shape.getProperties().add(property);
+                    }
+
+                    treeShapeList=treeShape.search(0,0,treeShape.getWidth(),treeShape.getHeight());
+                }
+                outputArea.setText("Test Shape successfully done!");
+            } else if (index == 2){
+                ArrayList<Shape> temp = tester.testShapeAll(
+                        treeShapeOptimize,
+                        counter,
+                        insert,
+                        delete,
+                        optimize,1
+                );
+
+                for (Shape shape : temp) {
+                    ArrayList<Property> propertiesNew = treeProperty.search(
+                            shape.getFirst().getX(),
+                            shape.getFirst().getY(),
+                            shape.getSecond().getX(),
+                            shape.getSecond().getY()
+                    );
+
+                    for (Property property : propertiesNew) {
+                        property.getShapes().add(shape);
+                        shape.getProperties().add(property);
+                    }
+
+                    treeShapeList.add(shape);
+                }
+                outputArea.setText("Test Shape successfully done!");
+            }
+            else {
+                outputArea.setText("Write index 1 for SHAPE 2 for SHAPEOPTIMIZED!");
             }
 
-            outputArea.setText("Test Shape successfully done!");
+
         } catch (Exception ex) {
             outputArea.setText("Error testing all shapes: " + ex.getMessage());
         }
     }
 
-    public void testAllProperties(int counter, int insert, int delete ,JTextArea outputArea  ) {
+    public void testAllProperties(int index,int counter, int insert, int delete ,JTextArea outputArea  ) {
         try {
-            ArrayList<Property> temp = tester.testPropertyAll(
-                    treeProperty,
-                    counter,
-                    insert,
-                    delete
-            );
-
-            for (Property property : temp) {
-                ArrayList<Shape> shapesNew = treeShape.search(
-                        property.getFirst().getX(),
-                        property.getFirst().getY(),
-                        property.getSecond().getX(),
-                        property.getSecond().getY()
+            boolean optimize;
+            if (index == 2) {
+                optimize=true;
+            } else {
+                optimize=false;
+            }
+            if (index == 1) {
+                ArrayList<Property> temp = tester.testPropertyAll(
+                        treeProperty,
+                        counter,
+                        insert,
+                        delete,
+                        optimize
                 );
 
-                for (Shape shape : shapesNew) {
-                    shape.getProperties().add(property);
-                    property.getShapes().add(shape);
-                }
+                for (Property property : temp) {
+                    ArrayList<Shape> shapesNew = treeShape.search(
+                            property.getFirst().getX(),
+                            property.getFirst().getY(),
+                            property.getSecond().getX(),
+                            property.getSecond().getY()
+                    );
 
-                treePropertyList.add(property);
+                    for (Shape shape : shapesNew) {
+                        shape.getProperties().add(property);
+                        property.getShapes().add(shape);
+                    }
+
+                    treePropertyList.add(property);
+                    outputArea.setText("Test Property successfully done!");
+                }
+            } else if (index == 2) {
+                ArrayList<Property> temp = tester.testPropertyAll(
+                        treePropertyOptimize,
+                        counter,
+                        insert,
+                        delete,
+                        optimize
+                );
+
+                for (Property property : temp) {
+                    ArrayList<Shape> shapesNew = treeShape.search(
+                            property.getFirst().getX(),
+                            property.getFirst().getY(),
+                            property.getSecond().getX(),
+                            property.getSecond().getY()
+                    );
+
+                    for (Shape shape : shapesNew) {
+                        shape.getProperties().add(property);
+                        property.getShapes().add(shape);
+                    }
+
+                    treePropertyList.add(property);
+                    outputArea.setText("Test Property successfully done!");
+                }
+            }
+            else {
+                outputArea.setText("Write index 1 for PROPERTY 2 for PROPERTYOPTIMIZED!");
             }
 
-            outputArea.setText("Test Property successfully done!");
         } catch (Exception ex) {
             outputArea.setText("Error testing all properties: " + ex.getMessage());
         }
@@ -358,6 +479,28 @@ public class Controller{
             } else {
                 outputArea.setText("Test insert failed!");
             }
+        } catch (Exception ex) {
+            outputArea.setText("Error testing insert: " + ex.getMessage());
+        }
+    }
+    public void insertDeleteSpeed(boolean optimize,int counter, JTextArea outputArea){
+
+        try {
+            if (optimize){
+                if (tester.testInsertDeleteSpeed(treeShapeOptimize, counter, optimize)) {
+                    outputArea.setText("Test insert delete optimized successfully done!");
+                } else {
+                    outputArea.setText("Test insert failed!");
+                }
+            }else {
+                if (tester.testInsertDeleteSpeed(treeShape, counter, optimize)) {
+                    outputArea.setText("Test insert delete not optimized successfully done!");
+                } else {
+                    outputArea.setText("Test insert failed!");
+                }
+            }
+
+
         } catch (Exception ex) {
             outputArea.setText("Error testing insert: " + ex.getMessage());
         }
@@ -469,6 +612,15 @@ public class Controller{
                             treeShape.insert(s);
                             treeShapeList.add(s);
                         }
+                        if (treeProperty!= null) {
+                            for (Shape shape : treeShapeList) {
+                                ArrayList<Property> temp = treeProperty.search(shape.getFirst().getX(), shape.getFirst().getY(), shape.getSecond().getX(), shape.getSecond().getY());
+                                for (Property item : temp) {
+                                    item.getShapes().add(shape);
+                                    shape.getProperties().add(item);
+                                }
+                            }
+                        }
                         outputArea.setText("Shapes were loaded from " + fileName);
                     } catch (IOException e) {
                         outputArea.setText("Error reading from file: " + e.getMessage());
@@ -493,6 +645,18 @@ public class Controller{
                             treeProperty.insert(p);
                             treePropertyList.add(p);
                         }
+                        if (treeShape!=null) {
+                            for (Property property : treePropertyList) {
+
+                                ArrayList<Shape> temp = treeShape.search(property.getFirst().getX(), property.getFirst().getY(), property.getSecond().getX(), property.getSecond().getY());
+                                for (Shape item : temp) {
+                                    item.getProperties().add(property);
+                                    property.getShapes().add(item);
+                                }
+                            }
+                        }
+
+
                         outputArea.setText("Shapes were loaded from " + fileName);
                     } catch (IOException e) {
                         outputArea.setText("Error reading from file: " + e.getMessage());

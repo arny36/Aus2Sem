@@ -9,11 +9,12 @@ public class Gui extends JFrame {
     insertPercentageField,deletePercentageField,counterField, newDepthField , gps1Field, gps2Field , identifierField , noteField, shapeField;
     private JButton healthShapeButton,healthPropertyButton, createTreeShapeButton, createTreePropertyButton, createGPSButton,
     testAllShapeButton, testAllPropertyButton, changeDepthShapeButton , changeDepthPropertyButton, createShapeButton , searchShapeButton , createPropertyButton , searchPropertyButton, editShapeButton, editPropertyButton , searchAllButton,
-    showGPSButton, deleteShapeButton ,deletePropertyButton  , showTreeShapesButton , showTreePropertyButton, resetButton , testInsert, testDelete , testSearch , loadButton , saveButton;
+    showGPSButton, deleteShapeButton ,deletePropertyButton  , showTreeShapesButton , showTreePropertyButton, resetButton , testInsert, testDelete , testSearch , loadButton , saveButton , optimizeButton , insertDeleteSpeedButton;
     private JLabel widthLabel, heightLabel, depthLabel, xLabel, yLabel,identifierLabel, noteLabel, gps1Label,
     gps2Label, insertPercentageLabel, deletePercentageLabel, counterLabel,
-    newDepthLabel, shapeLabel;
+    newDepthLabel, shapeLabel ,optimizeLabel;
     private JPanel treePanel, gpsPanel, landShapesPanel,topPanel, bottomPanel, buttonsPanel, testPanel , depthChangePanel, leftPanel, rightPanel;
+    private JCheckBox optimizedCB;
 
     private JTextArea outputArea;
     private Controller controler = new Controller();
@@ -53,6 +54,7 @@ public class Gui extends JFrame {
         testAllShapeButton = new JButton("Test all shape");
         testAllPropertyButton = new JButton("Test all property");
         testInsert = new JButton("Test insert");
+        insertDeleteSpeedButton = new JButton("Test speed i/e");
         testDelete = new JButton("Test delete");
         changeDepthShapeButton = new JButton("ChangeDepth Shape");
         changeDepthPropertyButton = new JButton("ChangeDepth Property");
@@ -60,6 +62,8 @@ public class Gui extends JFrame {
         showTreePropertyButton = new JButton("Show Property tree");
         deleteShapeButton = new JButton("Delete shapes");
         deletePropertyButton = new JButton("Delete properties");
+
+        optimizeButton = new JButton("Optimize");
         resetButton = new JButton("RESET");
         showGPSButton = new JButton("Show all GPS locations");
         testSearch = new JButton("Test Search");
@@ -83,6 +87,7 @@ public class Gui extends JFrame {
         insertPercentageLabel = new JLabel("Insert %:");
         deletePercentageLabel = new JLabel("Delete %:");
         counterLabel = new JLabel("Counter:");
+        optimizeLabel = new JLabel("Optimize ? :");
         newDepthLabel = new JLabel("NewDepth:");
         shapeLabel = new JLabel("INDEX LandShape:");
     }
@@ -143,12 +148,14 @@ public class Gui extends JFrame {
         buttonsPanel.add(showGPSButton);
         buttonsPanel.add(showTreeShapesButton);
         buttonsPanel.add(showTreePropertyButton);
+        buttonsPanel.add(optimizeButton);
         buttonsPanel.add(resetButton);
     }
 
     private void initializeTestPanel() {
         testPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         testPanel.add(testInsert);
+        testPanel.add(insertDeleteSpeedButton);
         testPanel.add(testDelete);
         testPanel.add(testSearch);
         testPanel.add(testAllShapeButton);
@@ -159,6 +166,9 @@ public class Gui extends JFrame {
         testPanel.add(deletePercentageField);
         testPanel.add(counterLabel);
         testPanel.add(counterField);
+        optimizedCB = new JCheckBox("Check me");
+        testPanel.add(optimizeLabel);
+        testPanel.add(optimizedCB);
     }
     private void initializeDepthChangePanel() {
         depthChangePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -233,21 +243,23 @@ public class Gui extends JFrame {
         showTreeShapesButton.addActionListener(e -> controler.showTreeShapes(outputArea));
         showTreePropertyButton.addActionListener(e -> controler.showTreeProperty(outputArea));
         createGPSButton.addActionListener(e -> controler.createGPS(Double.parseDouble(xField.getText()),Double.parseDouble(yField.getText()),outputArea));
-        createShapeButton.addActionListener(e -> controler.createShape(Integer.parseInt(gps1Field.getText()),Integer.parseInt(gps2Field.getText()),outputArea));
-        createPropertyButton.addActionListener(e -> controler.createProperty(Integer.parseInt(gps1Field.getText()),Integer.parseInt(gps2Field.getText()),outputArea));
+        createShapeButton.addActionListener(e -> controler.createShape(Integer.parseInt(identifierField.getText()),noteField.getText(),Integer.parseInt(gps1Field.getText()),Integer.parseInt(gps2Field.getText()),outputArea));
+        createPropertyButton.addActionListener(e -> controler.createProperty(Integer.parseInt(identifierField.getText()),noteField.getText(),Integer.parseInt(gps1Field.getText()),Integer.parseInt(gps2Field.getText()),outputArea));
         searchShapeButton.addActionListener(e -> controler.searchShape(Integer.parseInt(gps1Field.getText()),Integer.parseInt(gps2Field.getText()),outputArea));
         searchPropertyButton.addActionListener(e -> controler.searchProperty(Integer.parseInt(gps1Field.getText()),Integer.parseInt(gps2Field.getText()),outputArea));
         searchAllButton.addActionListener(e -> controler.searchAll(Integer.parseInt(gps1Field.getText()),Integer.parseInt(gps2Field.getText()),outputArea));
         deleteShapeButton.addActionListener(e -> controler.deleteShape(Integer.parseInt(shapeField.getText()),outputArea));
         deletePropertyButton.addActionListener(e -> controler.deleteProperty(Integer.parseInt(shapeField.getText()),outputArea));
-        healthShapeButton.addActionListener(e -> controler.calculateHealthShape(outputArea));
-        healthPropertyButton.addActionListener(e -> controler.calculateHealthProperty(outputArea));
+        healthShapeButton.addActionListener(e -> controler.calculateHealthShape(Integer.parseInt(shapeField.getText()),outputArea));
+        healthPropertyButton.addActionListener(e -> controler.calculateHealthProperty(Integer.parseInt(shapeField.getText()),outputArea));
         changeDepthShapeButton.addActionListener(e -> controler.changeDepthShape(Integer.parseInt(newDepthField.getText()),outputArea));
         changeDepthPropertyButton.addActionListener(e -> controler.changeDepthProperty(Integer.parseInt(newDepthField.getText()),outputArea));
+        optimizeButton.addActionListener(e -> controler.optimize(Integer.parseInt(shapeField.getText()),outputArea));
         resetButton.addActionListener(e -> controler.resetAll(outputArea));
-        testAllShapeButton.addActionListener(e -> controler.testAllShapes(Integer.parseInt(counterField.getText()),Integer.parseInt(insertPercentageField.getText()),Integer.parseInt(deletePercentageField.getText()),outputArea));
-        testAllPropertyButton.addActionListener(e -> controler.testAllProperties(Integer.parseInt(counterField.getText()),Integer.parseInt(insertPercentageField.getText()),Integer.parseInt(deletePercentageField.getText()),outputArea));
+        testAllShapeButton.addActionListener(e -> controler.testAllShapes(Integer.parseInt(shapeField.getText()),Integer.parseInt(counterField.getText()),Integer.parseInt(insertPercentageField.getText()),Integer.parseInt(deletePercentageField.getText()),outputArea));
+        testAllPropertyButton.addActionListener(e -> controler.testAllProperties(Integer.parseInt(shapeField.getText()),Integer.parseInt(counterField.getText()),Integer.parseInt(insertPercentageField.getText()),Integer.parseInt(deletePercentageField.getText()),outputArea));
         testInsert.addActionListener(e -> controler.testInsert(Integer.parseInt(counterField.getText()),outputArea));
+        insertDeleteSpeedButton.addActionListener(e -> controler.insertDeleteSpeed(optimizedCB.isSelected(),Integer.parseInt(counterField.getText()),outputArea));
         testDelete.addActionListener(e -> controler.testDelete(Integer.parseInt(counterField.getText()),Integer.parseInt(insertPercentageField.getText()),Integer.parseInt(deletePercentageField.getText()),outputArea));
         testSearch.addActionListener(e -> controler.testSearch(Integer.parseInt(counterField.getText()),outputArea));
         editShapeButton.addActionListener(e -> {

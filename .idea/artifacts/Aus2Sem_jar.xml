@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Aus2Sem:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Aus2Sem_jar</output-path>
+    <root id="archive" name="Aus2Sem.jar">
+      <element id="module-output" name="Aus2Sem" />
+    </root>
+  </artifact>
+</component>

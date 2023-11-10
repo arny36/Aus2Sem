@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Property<T extends IData<T>> extends LandShapes {
 
-    private ArrayList<Shape> shapes = new ArrayList<Shape>();
+    private ArrayList<Shape> shapes = new ArrayList();
 
 
     public Property(int identifier,GPS first, GPS second, String notes) {
@@ -14,7 +14,6 @@ public class Property<T extends IData<T>> extends LandShapes {
     public ArrayList<Shape> getShapes() {
         return shapes;
     }
-
 
 
 }

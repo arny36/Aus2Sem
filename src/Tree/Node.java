@@ -94,7 +94,7 @@ public class Node<T> {
 
     }
 
-    public boolean hasChildren() {return this.sw != null || this.se != null || this.nw != null || this.ne != null;}
+    public boolean hasChildren() {return this.sw != null;}
     public boolean hasChildrenChildren() {
         if (this.hasChildren()) {
             return this.sw.hasChildren() || this.se.hasChildren() || this.nw.hasChildren() || this.ne.hasChildren();

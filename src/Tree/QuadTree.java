@@ -102,7 +102,7 @@ public class QuadTree <T extends IData<T>> {
                             dataQueue = null;
                         }
                         else if (dataQueue.compareTo(tempNode.getNw()) == 1) {
-                            if (tempNode.getNw().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
+                            if (tempNode.getNw().getData().size() == 0 && !tempNode.getNw().hasChildren()) {
                                 tempNode = tempNode.getNw();
                                 tempNode.addData(dataQueue);
                                 tempNode = tempNode.getParent();
@@ -111,20 +111,20 @@ public class QuadTree <T extends IData<T>> {
                                 tempNode = tempNode.getNw();
                             }
                         } else if (dataQueue.compareTo(tempNode.getNe()) == 1) {
-                            if (tempNode.getNe().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
-                            tempNode = tempNode.getNe();
-                            tempNode.addData(dataQueue);
-                            tempNode = tempNode.getParent();
-                            dataQueue = null;
+                            if (tempNode.getNe().getData().size() == 0 && !tempNode.getNe().hasChildren()) {
+                                tempNode = tempNode.getNe();
+                                tempNode.addData(dataQueue);
+                                tempNode = tempNode.getParent();
+                                dataQueue = null;
                             } else {
                                 tempNode = tempNode.getNe();
                             }
                         } else if (dataQueue.compareTo(tempNode.getSe()) == 1) {
-                            if (tempNode.getSe().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
-                            tempNode = tempNode.getSe();
-                            tempNode.addData(dataQueue);
-                            tempNode = tempNode.getParent();
-                            dataQueue = null;
+                            if (tempNode.getSe().getData().size() == 0 && !tempNode.getSe().hasChildren()) {
+                                tempNode = tempNode.getSe();
+                                tempNode.addData(dataQueue);
+                                tempNode = tempNode.getParent();
+                                dataQueue = null;
                             } else {
                                 tempNode = tempNode.getSe();
                             }
@@ -225,34 +225,43 @@ public class QuadTree <T extends IData<T>> {
         Node<T> node = this.getRoot();
         boolean finder =  true;
         while (finder) {
-            for (T item : node.getData()) {
-                if (data == item) {
-                    finder=false;
-                }
-            }
-            if (finder) {
+
+            if (node.hasChildren()){
                 if (data.compareTo(node.getNw()) == 1) {
                     node=node.getNw();
                 }
                 else if (data.compareTo(node.getNe()) == 1) {
                     node=node.getNe();
                 }
-                else if (data.compareTo(node.getSw()) == 1) {
-                    node=node.getSw();
-                }
                 else if (data.compareTo(node.getSe()) == 1) {
                     node=node.getSe();
                 }
+                else if (data.compareTo(node.getSw()) == 1) {
+                    node=node.getSw();
+                }
+                else {
+                    for (T item : node.getData()) {
+                        if (data.equals(item)) {
+                            finder=false;
+                            break;
+                        }
+                    }
 
+                }
+            } else {
+                for (T item : node.getData()) {
+                    if (data.equals(item)) {
+                        finder=false;
+                    }
+                }
             }
         }
-
         return node;
+
     }
     public void delete(T data) {
         Node<T> node;
         Stack queue = new Stack<T>();
-        findNode(data);
         node = this.findNode(data);
         node.getData().remove(data);
         queue.push(node);
@@ -349,25 +358,36 @@ public class QuadTree <T extends IData<T>> {
 
 
     public double treeHealth() {
-        double health=0;
+
         double nodes=0;
         Node<T> node = this.getRoot();
-        Stack queue = new Stack<T>();
-        queue.push(node);
-        while(queue.size()>0){
-            node = (Node<T>) queue.pop();
+        LinkedList<Node<T>> list = new LinkedList<>();
+        list.push(node);
+
+        double allLands = this.countLands();
+        double allNodes =this.countNodes();
+        double allNodesWithData = allNodes-this.countFreeNodes();
+        double average = allLands/allNodes;
+
+
+        list.push(node);
+        while(list.size()>0){
+            node =list.pop();
+            if (node.hasData()) {
+                if (node.getData().size() >  average) {
+                    nodes++;
+                }
+
+            }
             if (node.hasChildren()) {
-                queue.push(node.getNw());
-                queue.push(node.getNe());
-                queue.push(node.getSe());
-                queue.push(node.getSw());
+                list.push(node.getNw());
+                list.push(node.getNe());
+                list.push(node.getSe());
+                list.push(node.getSw());
             }
-            if (node.hasData()){
-                health += 1.0 / node.getData().size();
-            }
-            nodes++;
         }
-        return health/nodes;
+
+        return (allNodesWithData-nodes);
 
     }
 
@@ -503,6 +523,26 @@ public class QuadTree <T extends IData<T>> {
         return counter;
     }
 
+    private int countNodes() {
+        int nodes=0;
+        Node<T> node = this.getRoot();
+        LinkedList<Node<T>> list = new LinkedList<>();
+
+        list.push(node);
+        while(list.size()>0){
+            node =list.pop();
+            nodes++;
+            if (node.hasChildren()) {
+                list.push(node.getNw());
+                list.push(node.getNe());
+                list.push(node.getSe());
+                list.push(node.getSw());
+            }
+        }
+        return nodes;
+
+    }
+
     private int countFreeNodes() {
         int counter = 0;
         Node<T> node = this.getRoot();
@@ -562,8 +602,10 @@ public class QuadTree <T extends IData<T>> {
         if (freeNodes > countLands) {
             newDepth = Math.ceil(Math.cbrt(freeNodes)) ;
             newTree.changeDepthTree(newDepth);
+//            newTree.changeDepthTree(this.maxDepth--);
         } else if (countLandsMaxDepth > freeNodes) {
             newTree.changeDepthTree(Math.ceil(Math.cbrt(countLands)));
+//            newTree.changeDepthTree(this.maxDepth++);
         }
 
 
@@ -581,8 +623,16 @@ public class QuadTree <T extends IData<T>> {
         T dataQueue = null;
         queue.push(data);
         boolean stopper = true;
-        double midX;
-        double midY;
+
+        double midY=0;
+        double midX=0;
+
+
+        if (this.root.hasChildren()){
+            midX = this.root.getNe().getX1();
+            midY = this.root.getNe().getY1();
+
+        }
 
         while(stopper){
             if(dataQueue==null) {
@@ -600,45 +650,77 @@ public class QuadTree <T extends IData<T>> {
                         dataQueue=null;
 
                     } else {
-                        if (tempNode.getData().size() > 0 && !tempNode.hasChildren() ) {
-                            if (dataQueue.canCreateSonsOptimize(tempNode)) {
-                                midX=data.calculateX(tempNode);
-                                midY=data.calculateY(tempNode);
-                                tempNode.setNw(new Node<T>(tempNode.getX1(), midY, midX, tempNode.getY2(), tempNode.getDepth() + 1));
-                                tempNode.setNe(new Node<T>(midX , midY, tempNode.getX2(), tempNode.getY2(), tempNode.getDepth() + 1));
-                                tempNode.setSe(new Node<T>(midX, tempNode.getY1(), tempNode.getX2(), midY, tempNode.getDepth() + 1));
-                                tempNode.setSw(new Node<T>(tempNode.getX1(), tempNode.getY1(), midX, midY, tempNode.getDepth() + 1));
-                                tempNode.getNw().setParent(tempNode);
-                                tempNode.getNe().setParent(tempNode);
-                                tempNode.getSe().setParent(tempNode);
-                                tempNode.getSw().setParent(tempNode);
-                            }
+                        if (tempNode.getData().size() > 0 && !tempNode.hasChildren()) {
+                            if (tempNode != this.root) {
+                                if (dataQueue.canCreateSons(tempNode)) {
+                                    tempNode.setNw(new Node<T>(tempNode.getX1(), (tempNode.getY1() + tempNode.getY2()) / 2, (tempNode.getX1() + tempNode.getX2()) / 2, tempNode.getY2(), tempNode.getDepth() + 1));
+                                    tempNode.setNe(new Node<T>(((tempNode.getX1() + tempNode.getX2())) / 2, (tempNode.getY1() + tempNode.getY2()) / 2, tempNode.getX2(), tempNode.getY2(), tempNode.getDepth() + 1));
+                                    tempNode.setSe(new Node<T>((tempNode.getX1() + tempNode.getX2()) / 2, tempNode.getY1(), tempNode.getX2(), (tempNode.getY1() + tempNode.getY2()) / 2, tempNode.getDepth() + 1));
+                                    tempNode.setSw(new Node<T>(tempNode.getX1(), tempNode.getY1(), (tempNode.getX1() + tempNode.getX2()) / 2, (tempNode.getY1() + tempNode.getY2()) / 2, tempNode.getDepth() + 1));
+                                    tempNode.getNw().setParent(tempNode);
+                                    tempNode.getNe().setParent(tempNode);
+                                    tempNode.getSe().setParent(tempNode);
+                                    tempNode.getSw().setParent(tempNode);
+                                }
+                            } else {
+                                midX = data.calculateX(tempNode);
+                                midY = data.calculateY(tempNode);
+                                if (dataQueue.canCreateSonsOptimize(tempNode,midX,midY)) {
+                                    tempNode.setNw(new Node<T>(tempNode.getX1(), midY, midX, tempNode.getY2(), tempNode.getDepth() + 1));
+                                    tempNode.setNe(new Node<T>(midX, midY, tempNode.getX2(), tempNode.getY2(), tempNode.getDepth() + 1));
+                                    tempNode.setSe(new Node<T>(midX, tempNode.getY1(), tempNode.getX2(), midY, tempNode.getDepth() + 1));
+                                    tempNode.setSw(new Node<T>(tempNode.getX1(), tempNode.getY1(), midX, midY, tempNode.getDepth() + 1));
+                                    tempNode.getNw().setParent(tempNode);
+                                    tempNode.getNe().setParent(tempNode);
+                                    tempNode.getSe().setParent(tempNode);
+                                    tempNode.getSw().setParent(tempNode);
 
-                            if (tempNode.getData().size() > 0) {
+                                }
+                            }
+                        }
+
+                        if (tempNode.getData().size() > 0) {
+                            if (tempNode != this.root) {
                                 for (T item : tempNode.getData()) {
-                                    if (item.canCreateSonsOptimize(tempNode)) {
+                                    if (item.canCreateSons(tempNode)) {
                                         queue.push(item);
-                                    }
-                                    else {
+                                    } else {
                                         newData.push(item);
                                     }
                                 }
-                                tempNode.getData().clear();
-                                while(newData.size()>0){
-
-                                    tempNode.getData().add( (T)newData.pop());
+                            } else {
+                                if (!this.root.hasChildren()){
+                                    for (T item : tempNode.getData()) {
+                                        if (item.canCreateSonsOptimize(tempNode, midX, midY)) {
+                                            queue.push(item);
+                                        } else {
+                                            newData.push(item);
+                                        }
+                                    }
+                                } else {
+                                    for (T item : tempNode.getData()) {
+                                        if (item.canCreateSonsOptimize(tempNode, midX, midY)) {
+                                            queue.push(item);
+                                        } else {
+                                            newData.push(item);
+                                        }
+                                    }
                                 }
-
-                                newData.clear();
-
                             }
+                            tempNode.getData().clear();
+                            while (newData.size() > 0) {
+                                tempNode.getData().add((T) newData.pop());
+                            }
+
+                            newData.clear();
                         }
-                        if (!dataQueue.canCreateSonsOptimize(tempNode)){
+
+
+                        if (!dataQueue.canCreateSonsOptimize(tempNode,midX,midY) || !tempNode.hasChildren()) {
                             tempNode.addData(dataQueue);
                             dataQueue = null;
-                        }
-                        else if (dataQueue.compareTo(tempNode.getNw()) == 1) {
-                            if (tempNode.getNw().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
+                        } else if (dataQueue.compareTo(tempNode.getNw()) == 1) {
+                            if (tempNode.getNw().getData().size() == 0 && !tempNode.getNw().hasChildren()) {
                                 tempNode = tempNode.getNw();
                                 tempNode.addData(dataQueue);
                                 tempNode = tempNode.getParent();
@@ -647,7 +729,7 @@ public class QuadTree <T extends IData<T>> {
                                 tempNode = tempNode.getNw();
                             }
                         } else if (dataQueue.compareTo(tempNode.getNe()) == 1) {
-                            if (tempNode.getNe().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
+                            if (tempNode.getNe().getData().size() == 0 && !tempNode.getNe().hasChildren()) {
                                 tempNode = tempNode.getNe();
                                 tempNode.addData(dataQueue);
                                 tempNode = tempNode.getParent();
@@ -656,7 +738,7 @@ public class QuadTree <T extends IData<T>> {
                                 tempNode = tempNode.getNe();
                             }
                         } else if (dataQueue.compareTo(tempNode.getSe()) == 1) {
-                            if (tempNode.getSe().getData().size() == 0 && !tempNode.getSw().hasChildren()) {
+                            if (tempNode.getSe().getData().size() == 0 && !tempNode.getSe().hasChildren()) {
                                 tempNode = tempNode.getSe();
                                 tempNode.addData(dataQueue);
                                 tempNode = tempNode.getParent();
@@ -677,24 +759,21 @@ public class QuadTree <T extends IData<T>> {
                             tempNode.addData(dataQueue);
                             dataQueue = null;
                         }
-
-
-
-
-                    }
-                } else {
-                    if (tempNode.getParent().hasParent()) {
-                        tempNode.getParent().addData(dataQueue);
-                        dataQueue=null;
                     }
                 }
+            } else {
+                if (tempNode.hasParent()) {
+                    tempNode.getParent().addData(dataQueue);
+                    dataQueue=null;
+                }
             }
-
             if (dataQueue == null && queue.size() < 1) {
                 stopper = false;
             }
         }
-
+//
     }
 
 }
+
+

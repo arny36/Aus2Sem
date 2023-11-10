@@ -1,6 +1,6 @@
 package Tree;
 
-public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
+public abstract class LandShapes  <T extends IData<T>> implements IData<T> {
 
     protected GPS first, second;
     protected String notes;
@@ -41,8 +41,11 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
 
     @Override
     public int compareTo(Node<T> node) {
-        if (this.first.getX() >= node.getX1() && this.first.getY() >= node.getY1()
-                && this.second.getX() <= node.getX2() && this.second.getY() <= node.getY2()) {
+
+        if ((this.first.getX() >= node.getX1() && this.first.getX() <= node.getX2()) &&
+                (this.first.getY() >= node.getY1() && this.first.getY() <= node.getY2()) &&
+                (this.second.getX() >= node.getX1() && this.second.getX() <= node.getX2()) &&
+                (this.second.getY() >= node.getY1() && this.second.getY() <= node.getY2())) {
             return 1;
         } else if ((node.getX1() <= this.first.getX() && this.first.getX() <= node.getX2()) ||
                 (node.getX1() <= this.second.getX() && this.second.getX() <= node.getX2()) ||
@@ -81,13 +84,13 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
         double x=0;
         double tempX=(node.getX1()+ node.getX2());
         if (Math.abs(tempX/2 - this.first.getY()) > Math.abs(tempX/2 - this.second.getY())){
-            if ((tempX/10 > Math.abs(tempX/2 - this.second.getY()))) {
+            if ((tempX/5 > Math.abs(tempX/2 - this.second.getY()))) {
                 x=this.second.getY();
             } else {
                 x=(tempX)/2;
             }
         } else {
-            if ((tempX/10 > Math.abs(tempX/2 - this.second.getY()))) {
+            if ((tempX/5 > Math.abs(tempX/2 - this.first.getY()))) {
                 x=this.first.getY();
             } else {
                 x=tempX/2;
@@ -101,13 +104,13 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
         double y=0;
         double tempY=(node.getY1()+ node.getY2());
         if (Math.abs(tempY/2 - this.first.getY()) > Math.abs(tempY/2 - this.second.getY())){
-            if ((tempY/10 > Math.abs(tempY/2 - this.second.getY()))) {
+            if ((tempY/5 > Math.abs(tempY/2 - this.second.getY()))) {
                 y=this.second.getY();
             } else {
                 y=(tempY)/2;
             }
         } else {
-            if ((tempY/10 > Math.abs(tempY/2 - this.second.getY()))) {
+            if ((tempY/5 > Math.abs(tempY/2 - this.first.getY()))) {
                 y=this.first.getY();
             } else {
                 y=tempY/2;
@@ -118,17 +121,17 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
 
     @Override
     public boolean canCreateSons(Node<T> node) {
-        if (this.first.getX() >= node.getX1() && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
-                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY2())) {
+        if ((this.first.getX() >= node.getX1()) && (this.first.getY() >= ((node.getY1() + node.getY2()) / 2)) &&
+                (this.second.getX() <= ((node.getX1() + node.getX2()) / 2)) && (this.second.getY() <= (node.getY2()))) {
             return true;
-        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= ((node.getY1() + node.getY2()) / 2) &&
-                this.second.getX() <= (node.getX2()) && this.second.getY() <= (node.getY2())) {
+        } else if ((this.first.getX() >= ((node.getX1() + node.getX2()) / 2)) && (this.first.getY() >= ((node.getY1() + node.getY2()) / 2)) &&
+                (this.second.getX() <= (node.getX2())) && (this.second.getY() <= (node.getY2()))) {
             return true;
-        } else if (this.first.getX() >= ((node.getX1() + node.getX2()) / 2) && this.first.getY() >= (node.getY1()) &&
-                this.second.getX() <= (node.getX2()) && this.second.getY() <= ((node.getY1() + node.getY2()) / 2)) {
+        } else if ((this.first.getX() >= ((node.getX1() + node.getX2()) / 2)) && (this.first.getY() >= (node.getY1())) &&
+                (this.second.getX() <= (node.getX2())) && (this.second.getY() <= ((node.getY1() + node.getY2()) / 2))) {
             return true;
-        } else if (this.first.getX() >= (node.getX1()) && this.first.getY() >= (node.getY1()) &&
-                this.second.getX() <= ((node.getX1() + node.getX2()) / 2) && this.second.getY() <= (node.getY1() + node.getY2() )/ 2) {
+        } else if ((this.first.getX() >= (node.getX1())) && (this.first.getY() >= (node.getY1())) &&
+                (this.second.getX() <= ((node.getX1() + node.getX2()) / 2)) && (this.second.getY() <= (node.getY1() + node.getY2() )/ 2)) {
             return true;
         }
 
@@ -137,9 +140,12 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
 
     }
     @Override
-    public boolean canCreateSonsOptimize(Node<T> node) {
-        double x = calculateX(node);
-        double y = calculateY(node);
+    public boolean canCreateSonsOptimize(Node<T> node,double midX, double midY) {
+//        double x = calculateX(node);
+//        double y = calculateY(node);
+        double x = midX;
+        double y = midY;
+
 
         if (this.first.getX() >= node.getX1() && this.first.getY() >= (y) &&
                 this.second.getX() <= (y) && this.second.getY() <= (node.getY2())) {
@@ -160,5 +166,14 @@ public abstract class LandShapes  <T extends IData<T>> implements IData<T>{
 
     }
 
-
+    @Override
+    public boolean equals(LandShapes land) {
+        if(land == null) {
+            return false;
+        }
+        else if((land.getIdentifier() == this.getIdentifier() || land==this) ) {
+            return true;
+        }
+        return false;
+    }
 }
